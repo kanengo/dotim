@@ -1,3 +1,4 @@
+using Auth;
 using Study.Models;
 using Study.Services;
 
@@ -11,6 +12,11 @@ builder.Services.Configure<BookStoreDatabaseSettings>(
 builder.Services.AddSingleton<BookStoreDatabase>();
 builder.Services.AddSingleton<BooksService>();
 builder.Services.AddSingleton<AccountService>();
+
+builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
+{
+    o.Address = new Uri("http://localhost:5235");
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

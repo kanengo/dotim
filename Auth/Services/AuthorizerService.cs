@@ -21,22 +21,21 @@ public class AuthorizerService: Authorizer.AuthorizerBase
         var account = await _accountService.GetByUsernameAsync(request.Account);
         if (account is null)
         {
-            
+            var status = new Status(StatusCode.NotFound, "账号不存在!");
+            throw new RpcException(status);
         }
-        else
+       
+        if (request.Password != account.Password)
         {
-            if (request.Password != account.Password)
-            {
-                var status = new Status(StatusCode.PermissionDenied, "密码错误");
-                throw new RpcException(status);
-            }
+            var status = new Status(StatusCode.PermissionDenied, "密码错误");
+            throw new RpcException(status);
         }
 
 
-        return Task.FromResult(new LoginReply
+        return await Task.FromResult(new LoginReply
         {
-            Token = "",
-            AccountId = 0
+            AccountId = account.Id,
+            Token = account.Token
         });
     }
 }
