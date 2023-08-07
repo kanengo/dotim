@@ -21,7 +21,7 @@ public class AuthorizerService: Authorizer.AuthorizerBase
         var account = await _accountService.GetByUsernameAsync(request.Account);
         if (account is null)
         {
-            var status = new Status(StatusCode.NotFound, "账号不存在!");
+            var status = new Status(StatusCode.NotFound, "account not exists!");
             throw new RpcException(status);
         }
        

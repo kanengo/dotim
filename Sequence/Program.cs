@@ -1,15 +1,15 @@
-using Auth.Services;
-
-using Auth.Infrastructure;
+using Sequence.Services;
+using Sequence.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.Configure<DatabaseSettings>(
     builder.Configuration.GetSection("Database")
 );
 
 builder.Services.AddSingleton<DatabaseService>();
-builder.Services.AddSingleton<AccountService>();
+builder.Services.AddSingleton<IncrementIdService>();
 
 // Additional configuration is required to successfully run gRPC on macOS.
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
@@ -21,7 +21,6 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();
-app.MapGrpcService<AuthorizerService>();
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");

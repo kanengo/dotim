@@ -1,4 +1,4 @@
-namespace Auth.Domain.Models;
+namespace Auth.Infrastructure;
 
 public class DatabaseSettings
 {

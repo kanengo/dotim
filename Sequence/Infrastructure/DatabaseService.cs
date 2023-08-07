@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace Auth.Infrastructure;
+
+namespace Sequence.Infrastructure;
 
 public class DatabaseService
 {
