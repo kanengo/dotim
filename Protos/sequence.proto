@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "Sequence";
+
+package sequence;
+
+message GetBizIncrementIdRequest {
+    string biz_id = 1;
+}
+
+message GetBizIncrementIdReply {
+    int64 max_id = 2;
+}
+
+service Sequencer {
+    rpc GetBizIncrementId (GetBizIncrementIdRequest) returns (GetBizIncrementIdReply);
+}

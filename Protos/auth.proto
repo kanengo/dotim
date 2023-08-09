@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "Auth";
+
+package auth;
+
+
+service Authorizer {
+  // Sends a greeting
+  rpc Login (LoginRequest) returns (LoginReply);
+}
+
+enum AuthLoginType {
+  AUTH_LOGIN_TYPE_NONE = 0;
+  AUTH_LOGIN_TYPE_ACCOUNT = 1;
+}
+
+message LoginRequest {
+  AuthLoginType login_type = 1;
+  string account = 2;
+  string password = 3;
+}
+
+message LoginReply {
+  string token = 1;
+  int64 account_id = 2;
+}
