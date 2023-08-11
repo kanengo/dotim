@@ -1,14 +1,11 @@
 using Sequence.Infrastructure;
+using Sequence.Infrastructure.Config;
+using Sequence.Infrastructure.Data;
 using Sequence.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<DatabaseSettings>(
-    builder.Configuration.GetSection("Database")
-);
-
-builder.Services.AddSingleton<DatabaseService>();
-builder.Services.AddSingleton<IncrementIdService>();
+builder.Services.AddSingleton<InfrastructureAggregator>();
 
 // Additional configuration is required to successfully run gRPC on macOS.
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682

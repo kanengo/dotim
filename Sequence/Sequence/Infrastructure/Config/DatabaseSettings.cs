@@ -1,10 +1,11 @@
-namespace Sequence.Infrastructure;
+namespace Sequence.Infrastructure.Config;
 
 public class DatabaseSettings
-{
+{   
+    public const string Database = "Database";
     public string? Connection { get; set; }
     
-    public string? Database { get; set; }
+    public string? DatabaseName { get; set; }
     
     public string? IncrementIdCollection { get; set; }
 }

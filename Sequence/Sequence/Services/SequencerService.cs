@@ -1,20 +1,21 @@
 using Grpc.Core;
 using Sequence.Infrastructure;
+using Sequence.Infrastructure.Data;
 
 namespace Sequence.Services;
 
 public class SequencerService: Sequencer.SequencerBase
 {
-    private readonly IncrementIdService _incrementIdService;
+    private readonly InfrastructureAggregator _infrastructureAggregator;
     
-    public SequencerService(IncrementIdService incrementIdService)
+    public SequencerService(InfrastructureAggregator infrastructureAggregator)
     {
-        _incrementIdService = incrementIdService;
+        _infrastructureAggregator = infrastructureAggregator;
     }
     
     public override async Task<GetBizIncrementIdReply> GetBizIncrementId(GetBizIncrementIdRequest request, ServerCallContext context)
     {
-        var maxId = await _incrementIdService.GetIncrementId(request.BizId);
+        var maxId = await _infrastructureAggregator.IncrementIdService.GetIncrementId(request.BizId);
 
         return await Task.FromResult(new GetBizIncrementIdReply
         {

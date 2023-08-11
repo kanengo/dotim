@@ -1,12 +1,12 @@
 using Auth.Infrastructure;
+using Auth.Infrastructure.Data;
 using Auth.Infrastructure.Rpc;
 using Auth.Services;
 using Sequence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<DatabaseService>();
-builder.Services.AddSingleton<AccountService>();
+builder.Services.AddSingleton<InfrastructureAggregator>();
 
 
 builder.Services.AddGrpcClient<Sequencer.SequencerClient>(o =>

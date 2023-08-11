@@ -1,9 +1,8 @@
-using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-
 using Sequence.Domain.Models;
-namespace Sequence.Infrastructure;
+
+namespace Sequence.Infrastructure.Data;
 
 public class IncrementIdService
 {   
