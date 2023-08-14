@@ -8,21 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="..\..\Protos\auth.proto" GrpcServices="Server"/>
-        <Protobuf Include="..\..\Protos\auth.int.proto" GrpcServices="Server"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Protobuf Include="..\..\Protos\sequence.proto" GrpcServices="Client"/>
+        <Protobuf Include="Protos\greet.proto" GrpcServices="Server"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore" Version="2.49.0"/>
-        <PackageReference Include="MongoDB.Driver" Version="2.20.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\Shared\Shared\Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -30,5 +20,6 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
-    
+
+
 </Project>

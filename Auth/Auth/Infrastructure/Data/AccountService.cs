@@ -15,9 +15,14 @@ public class AccountService
     }
 
 
-    public async Task<Account?> GetByUsernameAsync(string username)
+    public async Task<Account?> GetByUsernameAndAppIdAsync(string username, int appId)
     {
-        return await _databaseService.AccountCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
+        return await _databaseService.AccountCollection.Find(x => x.Username == username && x.AppId == appId).FirstOrDefaultAsync();
+    }
+    
+    public async Task<Account?> GetByTokenAsync(string token)
+    {
+        return await _databaseService.AccountCollection.Find(x => x.Token == token).FirstOrDefaultAsync();
     }
 
     public async Task CreateAsync(Account account) =>

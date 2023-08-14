@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared\Sha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Tests", "Shared\Shared.Tests\Shared.Tests.csproj", "{DD64F91F-8355-40BF-A343-40770F6DBC69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Comet", "Comet\Comet\Comet.csproj", "{2F747FE8-1C32-434D-B464-2C67E56F7926}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{DD64F91F-8355-40BF-A343-40770F6DBC69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD64F91F-8355-40BF-A343-40770F6DBC69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD64F91F-8355-40BF-A343-40770F6DBC69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F747FE8-1C32-434D-B464-2C67E56F7926}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F747FE8-1C32-434D-B464-2C67E56F7926}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F747FE8-1C32-434D-B464-2C67E56F7926}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F747FE8-1C32-434D-B464-2C67E56F7926}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

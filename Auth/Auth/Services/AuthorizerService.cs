@@ -24,7 +24,7 @@ public class AuthorizerService: Authorizer.AuthorizerBase
         {
             throw new RpcException(new Status(StatusCode.Unavailable, "unavailable service"));
         }
-        var account = await _infrastructureAggregator.AccountService.GetByUsernameAsync(request.Account);
+        var account = await _infrastructureAggregator.AccountService.GetByUsernameAndAppIdAsync(request.Account, request.AppId);
         if (account is null) //没有则自动创建
         {
             var id = await _rpcClientAggregator.SequencerClient.GetBizIncrementIdAsync(new GetBizIncrementIdRequest
@@ -38,6 +38,7 @@ public class AuthorizerService: Authorizer.AuthorizerBase
                 Password = request.Password,
                 Status = 1,
                 Username = request.Account,
+                AppId = request.AppId,
             };
 
             await _infrastructureAggregator.AccountService.CreateAsync(account);

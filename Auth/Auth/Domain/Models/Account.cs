@@ -13,6 +13,8 @@ public class Account
     
     public string? Token { get; set; }
     
+    public int AppId { get; set; }
+    
     public int Status { get; set; }
     
     // [BsonRepresentation(BsonType.DateTime)]

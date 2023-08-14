@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "Auth";
+
+package auth;
+
+
+service AuthorizerInternal {
+  // Sends a greeting
+  rpc CheckTokenValid (CheckTokenValidRequest) returns (CheckTokenValidReply);
+}
+
+message CheckTokenValidRequest {
+  string token = 1;
+}
+
+message CheckTokenValidReply {
+  int64 id = 1;
+  string data = 2;
+}

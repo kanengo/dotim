@@ -15,10 +15,17 @@ enum AuthLoginType {
   AUTH_LOGIN_TYPE_ACCOUNT = 1;
 }
 
+enum AppTypeId {
+  APP_TYPE_ID_NONE = 0;
+  APP_TYPE_ID_DOT_IM = 1;
+}
+
 message LoginRequest {
   AuthLoginType login_type = 1;
-  string account = 2;
+  string account = 2; 
   string password = 3;
+  
+  int32 app_id = 4;
 }
 
 message LoginReply {
