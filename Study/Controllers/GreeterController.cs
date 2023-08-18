@@ -1,4 +1,5 @@
 using Auth;
+using Google.Protobuf;
 
 namespace Study.Controllers;
 using Microsoft.AspNetCore.Mvc;

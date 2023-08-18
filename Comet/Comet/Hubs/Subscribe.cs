@@ -11,7 +11,7 @@ public class SubscribeHub: Hub
     }
     public override Task OnConnectedAsync()
     {
-        _logger.Log(LogLevel.Information, "user:{@ContextUser}", Context.User);
+        _logger.Log(LogLevel.Information, "user:{@ContextUser}", Context.UserIdentifier);
         return base.OnConnectedAsync();
     }
 

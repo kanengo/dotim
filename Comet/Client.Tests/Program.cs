@@ -5,7 +5,12 @@ var app = builder.Build();
 
 // app.MapGet("/", () => "Hello World!");
 
-var hubConnection = new HubConnectionBuilder().WithUrl(new Uri("http://localhost:5241/ws_subscribe")).Build();
+var hubConnection = new HubConnectionBuilder().WithUrl("http://localhost:6666/ws_subscribe").Build();
+
+hubConnection.On<string,string>("ReceiveMessage", (user, message) =>
+{
+
+});
 
 await hubConnection.StartAsync();
 
