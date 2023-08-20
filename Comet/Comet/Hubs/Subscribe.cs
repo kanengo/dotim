@@ -15,6 +15,12 @@ public class SubscribeHub: Hub
         return base.OnConnectedAsync();
     }
 
+    public Task Heartbeat()
+    {
+        _logger.Log(LogLevel.Information, "heartbeat");
+        return Task.CompletedTask;
+    }
+
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         return base.OnDisconnectedAsync(exception);
