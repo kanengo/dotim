@@ -1,4 +1,3 @@
-using Comet.Hubs;
 using Comet.Services;
 
 var builder = WebApplication.CreateBuilder(args);

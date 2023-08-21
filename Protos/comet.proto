@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option csharp_namespace = "Comet";
+
+package comet;
+
+message RequestPacket {
+  string method = 1;
+  map<string, string> metadata = 2;
+  bytes data = 3;
+}
