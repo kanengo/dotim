@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Comet.Models;
+namespace Comet.Domains.Models;
 
 public class WebSocketRequest
 {

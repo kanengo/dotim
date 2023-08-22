@@ -1,7 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using Comet.Models;
+using Comet.Domains.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Comet.Controllers;
