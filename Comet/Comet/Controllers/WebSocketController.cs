@@ -1,8 +1,10 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using Comet.Domains.Models;
+using Comet.Domains;
 using Microsoft.AspNetCore.Mvc;
+using Comet;
+using Comet.Exceptions;
 
 namespace Comet.Controllers;
 
@@ -14,7 +16,7 @@ public class WebSocketController: ControllerBase
     {
         _logger = logger;
     }
-    [Route("/ws")]
+    [Route("/ws_sub")]
     public async Task Connect()
     {
         if (!HttpContext.WebSockets.IsWebSocketRequest)
@@ -32,7 +34,14 @@ public class WebSocketController: ControllerBase
         {
             _logger.LogError("WebSocketException:{Code}-{Message}", ex.ErrorCode, ex.Message);
             if (webSocket.State.Equals(WebSocketState.Open) || webSocket.State.Equals(WebSocketState.CloseReceived))
-                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Internal server error",
+                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
+                    CancellationToken.None);
+        }
+        catch (ConnectException ex)
+        {
+            _logger.LogError("ConnectException:{Code}-{Message}", ex.ErrorCode, ex.Message);
+            if (webSocket.State.Equals(WebSocketState.Open) || webSocket.State.Equals(WebSocketState.CloseReceived))
+                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
                     CancellationToken.None);
         }
         catch (Exception ex)
@@ -44,24 +53,23 @@ public class WebSocketController: ControllerBase
 
     private async Task _handleWebsocket(WebSocket webSocket)
     {
-        var buffer = new byte[512];
-        var receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-        while (!receiveResult.CloseStatus.HasValue)
+        var connection = new Connection(webSocket, 512, _logger);
+        while (true)
         {
-            var segmentBuffer = new ArraySegment<byte>(buffer, 0, receiveResult.Count);
-            _logger.LogDebug("receive:{Buffer}",Encoding.UTF8.GetString(segmentBuffer));
-            var request = JsonSerializer.Deserialize<WebSocketRequest>(segmentBuffer);
-            
-            
-            receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            var data = await connection.Read();
+            if (data is null)
+            {
+                _logger.LogInformation("connection read return null");
+                break;
+            }
+
+            var packet = JsonSerializer.Deserialize<RequestPacket>(data);
+            _logger.LogDebug("Receive packet:{Packet}",packet?.ToString());
         }
-
-        await webSocket.CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription,
-            CancellationToken.None);
     }
 
-    private async Task _heartbeat(string message)
-    {
-        
-    }
+    // private async Task _heartbeat(string message)
+    // {
+    //     
+    // }
 }

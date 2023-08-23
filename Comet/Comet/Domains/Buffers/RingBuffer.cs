@@ -1,4 +1,5 @@
-using System.Text.Json;
+
+using System.Collections;
 
 namespace Comet.Domains.Buffers;
 
@@ -33,10 +34,83 @@ public class RingBuffer
         return n;
     }
 
-    public struct Separation
+    public readonly struct Separation 
     {
-        public ArraySegment<byte>? Head { get; set; }
-        public ArraySegment<byte>? Tail { get; set;}
+        public Separation(ArraySegment<byte> head = default, ArraySegment<byte> tail = default)
+        {
+            Head = head;
+            Tail = tail;
+        }
+
+        public ArraySegment<byte> Head { get; } = ArraySegment<byte>.Empty;
+        public ArraySegment<byte> Tail { get; } = ArraySegment<byte>.Empty;
+
+        public SeparationIterator Iterator()
+        {
+            return new SeparationIterator(this);
+        }
+        public  struct SeparationIterator : IEnumerator<byte>
+        {
+            private readonly Separation _separation;
+            private int _current = 0;
+            private int _index = -1;
+            
+            public SeparationIterator(Separation separation)
+            {
+                _separation = separation;
+            }
+            
+            public bool MoveNext()
+            {
+                if (_current == 0 )
+                {
+                    if (_index >= _separation.Head.Count - 1)
+                    {
+                        _index = -1;
+                        _current = 1;
+                    }
+                    else
+                    {
+                        _index += 1;
+                        return true;
+                     
+                    }
+                }
+
+                if (_index >= _separation.Tail.Count - 1) return false;
+                
+                _index += 1;
+                return true;
+            }
+
+            public void Reset()
+            {
+                _current = 0;
+                _index = -1;
+            }
+
+            public byte Current
+            {
+                get
+                {
+                    try
+                    {
+                        return _current == 0 ? _separation.Head[_index] : _separation.Tail[_index];
+                    }
+                    catch (IndexOutOfRangeException ex)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
+            }
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 
     public RingBuffer(int size)
@@ -49,11 +123,11 @@ public class RingBuffer
         _slice = new ArraySegment<byte>(_buf);
     }
 
-    public Separation? Peek(int n)
+    public Separation Peek(int n)
     {
         if (_isEmpty)
         {
-            return null;
+            return default;
         }
 
         if (n <= 0)
@@ -61,7 +135,7 @@ public class RingBuffer
             return PeekAll();
         }
 
-        var separation = new Separation();
+        
         
         if (_w > _r)
         {
@@ -69,46 +143,48 @@ public class RingBuffer
             if (m1 > n)
                 m1 = n;
             
-            separation.Head = new ArraySegment<byte>(_buf, _r, m1);
-            return separation;
+            return new Separation(new ArraySegment<byte>(_buf, _r, m1));
         }
 
         var m2 = _size - _r + _w;
         if (m2 > n)
             m2 = n;
 
+        ArraySegment<byte> head;
+        ArraySegment<byte> tail = default;
         if (_r + m2 <= _size)
         {
-            separation.Head = new ArraySegment<byte>(_buf, _r, m2);
+            head = new ArraySegment<byte>(_buf, _r, m2);
         }
         else
         {
             var c1 = _size - _r;
-            separation.Head = new ArraySegment<byte>(_buf, _r, _size - _r);
+            head= new ArraySegment<byte>(_buf, _r, _size - _r);
             var c2 = m2 - c1;
-            separation.Tail = new ArraySegment<byte>(_buf, 0, c2);
+            tail = new ArraySegment<byte>(_buf, 0, c2);
         }
 
-        return separation;
+        return new Separation(head, tail);
     }
 
-    public Separation? PeekAll()
+    public Separation PeekAll()
     {
         if (_isEmpty)
-            return null;
-
-        var separation = new Separation();
+            return default;
+        
+        ArraySegment<byte> head;
+        ArraySegment<byte> tail = default;
         if (_w > _r)
         {
-            separation.Head = new ArraySegment<byte>(_buf, _r, _w - _r);
-            return separation;
+            head = new ArraySegment<byte>(_buf, _r, _w - _r);
+            return new Separation(head);
         }
 
-        separation.Head = new ArraySegment<byte>(_buf, _r, _size - _r);
+        head = new ArraySegment<byte>(_buf, _r, _size - _r);
         if (_w != 0)
-            separation.Tail = new ArraySegment<byte>(_buf, 0, _w);
+            tail = new ArraySegment<byte>(_buf, 0, _w);
 
-        return separation;
+        return new Separation(head,tail);
     }
 
     public int Discard(int n)
@@ -238,7 +314,7 @@ public class RingBuffer
 
         _isEmpty = false;
         
-        return 0;
+        return n;
     }
 
    

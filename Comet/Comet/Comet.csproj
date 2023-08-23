@@ -12,6 +12,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Protobuf Include="..\..\Protos\comet.proto" GrpcServices="Server"/>
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
