@@ -26,20 +26,31 @@ public class Connection
         _logger = logger;
     }
 
-    public async Task<byte[]?> Read()
+    public async IAsyncEnumerable<byte[]> Read()
     {
-        var receiveResult = await _webSocket.ReceiveAsync(_buffer, CancellationToken.None);
-        if (receiveResult.CloseStatus.HasValue)
+        while (true)
         {
-            await _webSocket.CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription,
+            var receiveResult = await _webSocket.ReceiveAsync(_buffer, CancellationToken.None);
+            if (receiveResult.CloseStatus.HasValue)
+            {
+                await _webSocket.CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription,
+                    CancellationToken.None);
+                yield break;
+            }
+
+            _protocol.Write(_buffer[0..receiveResult.Count]);
+
+            var data = _protocol.CheckCompleteData();
+
+            if (data is not null)
+            {
+                yield return data;
+            }
+
+            if (_webSocket.State == WebSocketState.Open) continue;
+            await _webSocket.CloseAsync(WebSocketCloseStatus.Empty, "websocket closed",
                 CancellationToken.None);
-            return default;
+            yield break;
         }
-
-        _protocol.Write(_buffer[0..receiveResult.Count]);
-
-        var data = _protocol.CheckCompleteData();
-
-        return null;
     }
 }

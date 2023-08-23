@@ -3,14 +3,15 @@ namespace Comet.Exceptions;
 
 public enum ConnectErrorCode
 {
-    BufferInvalid = 1001
+    BufferInvalid = 1001,
+    ReceivedBufferTooLarge = 1002,
 }
 
 public class ConnectException : Exception
 {
     public ConnectErrorCode ErrorCode { get; }
 
-    public ConnectException(ConnectErrorCode code, string? message) : base(message)
+    public ConnectException(ConnectErrorCode code, string? message = default) : base(message)
     {
         ErrorCode = code;
     }

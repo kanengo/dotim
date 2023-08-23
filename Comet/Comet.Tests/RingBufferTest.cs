@@ -1,5 +1,7 @@
 using System.Text;
+using System.Text.Json;
 using Comet.Domains.Buffers;
+using Google.Protobuf;
 
 namespace Comet.Tests;
 
@@ -40,5 +42,19 @@ public class RingBufferTest
         Console.WriteLine();
         
         Assert.Pass();
+    }
+
+    [Test]
+    public void TestPbJson()
+    {
+        var pb = new RequestPacket
+        {
+            Method = "heartbeat",
+            Data  = ByteString.CopyFrom("ping", Encoding.UTF8),
+        };
+
+        var jsonString = JsonSerializer.Serialize(pb);
+        
+        Console.WriteLine(jsonString);
     }
 }

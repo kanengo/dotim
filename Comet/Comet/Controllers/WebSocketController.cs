@@ -33,14 +33,14 @@ public class WebSocketController: ControllerBase
         catch (WebSocketException ex)
         {
             _logger.LogError("WebSocketException:{Code}-{Message}", ex.ErrorCode, ex.Message);
-            if (webSocket.State.Equals(WebSocketState.Open) || webSocket.State.Equals(WebSocketState.CloseReceived))
+            if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived)
                 await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
                     CancellationToken.None);
         }
         catch (ConnectException ex)
         {
             _logger.LogError("ConnectException:{Code}-{Message}", ex.ErrorCode, ex.Message);
-            if (webSocket.State.Equals(WebSocketState.Open) || webSocket.State.Equals(WebSocketState.CloseReceived))
+            if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived)
                 await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
                     CancellationToken.None);
         }
@@ -54,18 +54,12 @@ public class WebSocketController: ControllerBase
     private async Task _handleWebsocket(WebSocket webSocket)
     {
         var connection = new Connection(webSocket, 512, _logger);
-        while (true)
+        await foreach (var data in connection.Read().ConfigureAwait(false))
         {
-            var data = await connection.Read();
-            if (data is null)
-            {
-                _logger.LogInformation("connection read return null");
-                break;
-            }
-
             var packet = JsonSerializer.Deserialize<RequestPacket>(data);
             _logger.LogDebug("Receive packet:{Packet}",packet?.ToString());
         }
+        _logger.LogInformation("connection close");
     }
 
     // private async Task _heartbeat(string message)

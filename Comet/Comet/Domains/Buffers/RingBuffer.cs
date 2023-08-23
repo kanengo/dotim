@@ -196,6 +196,8 @@ public class RingBuffer
         if (n < discarded)
         {
             _r = (_r + n) % _size;
+            if (_r == _w)
+                _reset();
             return n;
         }
         

@@ -34,11 +34,12 @@ public class Protocol
 
     public byte[]? CheckCompleteData()
     {
-        switch (_stage)
+        while (true)
         {
-            case Stage.Empty:
-                if (_cachedBuffer.Length >= HeaderSize)
-                {
+            switch (_stage)
+            {
+                case Stage.Empty:
+                    if (_cachedBuffer.Length < HeaderSize) return default;
                     var sp = _cachedBuffer.Peek(HeaderSize);
                     var count = HeaderSize;
 
@@ -58,13 +59,33 @@ public class Protocol
                     }
 
                     _remainder = dataSize;
-                }
-                break;
-            case Stage.Pending:
-                break;
-            default:
-                break;
+                    _cachedBuffer.Discard(HeaderSize);
+
+                    //超出数据限制
+                    if (_remainder > _cachedBuffer.Size)
+                    {
+                        throw new ConnectException(ConnectErrorCode.ReceivedBufferTooLarge);
+                    }
+                    _stage = Stage.Pending;
+                    break;
+                case Stage.Pending:
+                    if (_cachedBuffer.Length < _remainder) return default;
+                    
+                    var data = new byte[_remainder];
+                    var n = _cachedBuffer.Read(data);
+
+                    if (n != _remainder)
+                    {
+                        throw new ConnectException(ConnectErrorCode.BufferInvalid, "buffer read n invalid");
+                    }
+
+                    return data;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
+        
 
         return default;
     }
