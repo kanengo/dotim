@@ -16,6 +16,8 @@ public class RingBuffer
 
     public int Length => _buffered();
 
+    public int Available => _available();
+
     public int Size => _size;
     
 
@@ -284,7 +286,7 @@ public class RingBuffer
         if (n == 0)
             return 0;
 
-        var free = Available();
+        var free = _available();
         if (n > free)
         {
             throw new ApplicationException("no available space to write");
@@ -323,7 +325,7 @@ public class RingBuffer
 
     public void WriteByte(byte b)
     {
-        if (Available() < 1)
+        if (_available() < 1)
         {
             throw new ApplicationException("no available space to write");
         }
@@ -378,7 +380,7 @@ public class RingBuffer
     }
     
 
-    private int Available()
+    private int _available()
     {
         if (_r == _w)
         {

@@ -5,6 +5,7 @@ public enum ConnectErrorCode
 {
     BufferInvalid = 1001,
     ReceivedBufferTooLarge = 1002,
+    ReceivedPacketInvalid = 1003,
 }
 
 public class ConnectException : Exception

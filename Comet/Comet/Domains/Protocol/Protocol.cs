@@ -14,6 +14,8 @@ public class Protocol
     private int _remainder = 0;
 
     private const int HeaderSize = 2;
+
+    public int BufferAvailable => _cachedBuffer.Available;
     
     private enum Stage
     {
@@ -27,9 +29,9 @@ public class Protocol
         _cachedBuffer = new RingBuffer(size);
     }
 
-    public void Write(ArraySegment<byte> buffer)
+    public int Write(ArraySegment<byte> buffer)
     {
-        _cachedBuffer.Write(buffer);
+        return _cachedBuffer.Write(buffer);
     }
 
     public byte[]? CheckCompleteData()
@@ -79,6 +81,9 @@ public class Protocol
                         throw new ConnectException(ConnectErrorCode.BufferInvalid, "buffer read n invalid");
                     }
 
+                    _stage = Stage.Empty;
+                    _remainder = 0;
+                    
                     return data;
 
                 default:

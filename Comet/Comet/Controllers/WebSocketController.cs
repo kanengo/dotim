@@ -32,16 +32,16 @@ public class WebSocketController: ControllerBase
         }
         catch (WebSocketException ex)
         {
-            _logger.LogError("WebSocketException:{Code}-{Message}", ex.ErrorCode, ex.Message);
-            if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived)
+            _logger.LogDebug("WebSocketException:{Code}-{Message}", ex.ErrorCode, ex.Message);
+            if (webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
                 await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
                     CancellationToken.None);
         }
         catch (ConnectException ex)
-        {
-            _logger.LogError("ConnectException:{Code}-{Message}", ex.ErrorCode, ex.Message);
-            if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived)
-                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
+        {   
+            _logger.LogWarning("ConnectException:{Code}-{Message}", ex.ErrorCode, ex.Message);
+            if (webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+                await webSocket.CloseAsync(WebSocketCloseStatus.ProtocolError, $"{ex.ErrorCode}-{ex.Message}",
                     CancellationToken.None);
         }
         catch (Exception ex)
@@ -53,11 +53,28 @@ public class WebSocketController: ControllerBase
 
     private async Task _handleWebsocket(WebSocket webSocket)
     {
-        var connection = new Connection(webSocket, 512, _logger);
-        await foreach (var data in connection.Read().ConfigureAwait(false))
+        var connection = new Connection(webSocket, 512, _logger, new CancellationTokenSource());
+
+        
+        await foreach (var data in connection.ReceiveAsync().ConfigureAwait(false))
         {
-            var packet = JsonSerializer.Deserialize<RequestPacket>(data);
-            _logger.LogDebug("Receive packet:{Packet}",packet?.ToString());
+            _logger.LogDebug("Receive packet:{Data}",Encoding.UTF8.GetString(data));
+            try
+            {
+                var packet = JsonSerializer.Deserialize<RequestPacket>(data);
+                if (packet is null)
+                {
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("receive packet deserialize exception:{Message}",ex.Message);
+                throw new ConnectException(ConnectErrorCode.ReceivedPacketInvalid, "receive packet json deserialize failed");
+            }
+        
+
+            // await webSocket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary,true, CancellationToken.None);
         }
         _logger.LogInformation("connection close");
     }
