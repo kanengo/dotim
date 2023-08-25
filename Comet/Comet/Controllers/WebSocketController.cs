@@ -3,14 +3,16 @@ using System.Text;
 using System.Text.Json;
 using Comet.Domains;
 using Microsoft.AspNetCore.Mvc;
-using Comet;
 using Comet.Exceptions;
+using NanoidDotNet;
 
 namespace Comet.Controllers;
 
 public class WebSocketController: ControllerBase
 {
     private readonly ILogger<WebSocketController> _logger;
+
+    private const int BufferSize = 512; 
 
     public WebSocketController(ILogger<WebSocketController> logger)
     {
@@ -26,61 +28,77 @@ public class WebSocketController: ControllerBase
         }
 
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+
+        var connection = new ConnectionBuilder().AddLogger(_logger).BufferSize(BufferSize).Build(webSocket);
+        connection.OnDataEvent += (sender, args) =>
+        {
+            if (sender is Connection c)
+                _onData(c, args);
+        };
+        connection.OnCloseEvent += (sender, args) =>
+        {
+            if (sender is Connection c)
+            {
+                _onClose(c.ConnectionId);
+            }
+        };
+        connection.OnConnectEvent += (sender, args) =>
+        {
+            if (sender is Connection c)
+            {
+                _onConnect(c);
+            }
+        };
+        await connection.Start();
+    }
+
+    private void _onData(Connection connection, Connection.OnDataEventArgs args)
+    {
+        var data = args.Data;
         try
-        {
-            await _handleWebsocket(webSocket);
-        }
-        catch (WebSocketException ex)
-        {
-            _logger.LogDebug("WebSocketException:{Code}-{Message}", ex.ErrorCode, ex.Message);
-            if (webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, $"Internal server error:{ex.ErrorCode}-{ex.Message}",
-                    CancellationToken.None);
-        }
-        catch (ConnectException ex)
         {   
-            _logger.LogWarning("ConnectException:{Code}-{Message}", ex.ErrorCode, ex.Message);
-            if (webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
-                await webSocket.CloseAsync(WebSocketCloseStatus.ProtocolError, $"{ex.ErrorCode}-{ex.Message}",
-                    CancellationToken.None);
+            var packet = JsonSerializer.Deserialize<RequestPacket>(data);
+            if (packet is null)
+            {
+                _logger.LogDebug("Receive packet is null: RawData:{Data}", Encoding.UTF8.GetString(data));
+                return;
+            }
+
+            _logger.LogDebug("Receive packet:{Data}", packet);
+
+            switch (packet.Method)
+            {
+                case "heartbeat":
+                    // await _heartbeat();
+                    break;
+            }
+        }
+        catch (Exception ex) when(ex is JsonException or NotSupportedException)
+        {
+            _logger.LogWarning("receive packet deserialize exception:{Message}", ex.Message);
+            throw new ConnectException(ConnectErrorCode.ReceivedPacketInvalid,
+                "receive packet json deserialize failed");
         }
         catch (Exception ex)
         {
-            _logger.LogError("Exception:{Message}", ex.Message);
+            _logger.LogWarning("receive packet exception:{Message}", ex.Message);
             throw;
         }
     }
-
-    private async Task _handleWebsocket(WebSocket webSocket)
+    
+    private void _onConnect(Connection connection)
     {
-        var connection = new Connection(webSocket, 512, _logger, new CancellationTokenSource());
-
-        
-        await foreach (var data in connection.ReceiveAsync().ConfigureAwait(false))
-        {
-            _logger.LogDebug("Receive packet:{Data}",Encoding.UTF8.GetString(data));
-            try
-            {
-                var packet = JsonSerializer.Deserialize<RequestPacket>(data);
-                if (packet is null)
-                {
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("receive packet deserialize exception:{Message}",ex.Message);
-                throw new ConnectException(ConnectErrorCode.ReceivedPacketInvalid, "receive packet json deserialize failed");
-            }
-        
-
-            // await webSocket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary,true, CancellationToken.None);
-        }
-        _logger.LogInformation("connection close");
+        _logger.LogDebug("connection connect:{}", connection.ConnectionId);
     }
 
-    // private async Task _heartbeat(string message)
-    // {
-    //     
-    // }
+
+    private void _onClose(string connectionId)
+    {
+        _logger.LogDebug("connection closed:{}", connectionId);
+    }
+
+    private async Task _heartbeat()
+    {
+        await Task.CompletedTask;
+    }
 }

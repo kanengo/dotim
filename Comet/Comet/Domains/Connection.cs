@@ -1,7 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using Comet.Domains.Models;
 using Comet.Exceptions;
 
 namespace Comet.Domains;
@@ -14,12 +13,31 @@ public class Connection
 
     private readonly ArraySegment<byte> _buffer;
 
-    private readonly ILogger _logger;
+    private readonly ILogger? _logger;
 
     private readonly CancellationTokenSource _cts;
 
-    public Connection(WebSocket webSocket, int bufferSize, ILogger logger, CancellationTokenSource cts)
+    public event EventHandler<OnDataEventArgs>? OnDataEvent;
+    public event EventHandler? OnCloseEvent;
+
+    public event EventHandler? OnConnectEvent;
+    
+    public string ConnectionId {get;} 
+
+    public class OnDataEventArgs : EventArgs
     {
+        public byte[] Data { get; }
+
+        public OnDataEventArgs(byte[] data)
+        {
+            Data = data;
+        }
+    }
+
+    public Connection(string connectionId, WebSocket webSocket, ILogger? logger,int bufferSize, CancellationTokenSource? cts)
+    {
+        ConnectionId = connectionId;
+        
         _webSocket = webSocket;
 
         _protocol = new Protocol.Protocol(bufferSize);
@@ -28,22 +46,77 @@ public class Connection
 
         _logger = logger;
 
-        _cts = cts;
+        _cts = cts??new CancellationTokenSource();
     }
 
-    public async IAsyncEnumerable<byte[]> ReceiveAsync()
+    public async Task Start()
+    {
+        try
+        {   
+            OnConnectEvent?.Invoke(this, EventArgs.Empty);
+            await foreach (var data in _receiveAsync().ConfigureAwait(false))
+            {
+                // _logger.LogDebug("Receive packet:{Data}",Encoding.UTF8.GetString(data));
+                try
+                {
+                    OnDataEvent?.Invoke(this, new OnDataEventArgs(data));
+                }
+                catch (ConnectException ex)
+                {
+                    _logger?.LogWarning("receive data event invoke connect exception:{Code}-{Message}",ex.ErrorCode, ex.Message);
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning("receive data event invoke exception:{Message}", ex.Message);
+                    throw;
+                }
+            }
+        }
+        catch (WebSocketException ex)
+        {
+            _logger?.LogDebug("WebSocketException:{Code}-{Message}", ex.ErrorCode, ex.Message);
+            await CloseAsync(WebSocketCloseStatus.InternalServerError,
+                $"Internal server error:{ex.ErrorCode}-{ex.Message}");
+        }
+        catch (ConnectException ex)
+        {   
+            _logger?.LogWarning("ConnectException:{Code}-{Message}", ex.ErrorCode, ex.Message);
+            await CloseAsync(WebSocketCloseStatus.ProtocolError, $"{ex.ErrorCode}-{ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Exception:{Message}", ex.Message);
+            await CloseAsync(WebSocketCloseStatus.InternalServerError, $"{ex.Message}");
+        }
+        
+
+    }
+
+    private async Task CloseAsync(WebSocketCloseStatus webSocketCloseStatus, string? statusDescription)
+    {
+        if (_webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived or WebSocketState.CloseSent)
+        {
+            await _webSocket.CloseAsync(webSocketCloseStatus, statusDescription,
+                CancellationToken.None);
+        }
+        OnCloseEvent?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task SendMessage(ArraySegment<byte> data)
+    {
+        await _webSocket.SendAsync(data, WebSocketMessageType.Binary, true, _cts.Token);
+    }
+
+    private async IAsyncEnumerable<byte[]> _receiveAsync()
     {
         while (true)
         {
             var receiveResult = await _webSocket.ReceiveAsync(_buffer, _cts.Token);
             if (receiveResult.CloseStatus.HasValue)
             {
-                _logger.LogDebug("websocket receive close: {Status}-{Desc}", receiveResult.CloseStatus, receiveResult.CloseStatusDescription);
-                if (_webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived or WebSocketState.CloseSent)
-                {
-                    await _webSocket.CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription,
-                        CancellationToken.None);
-                }
+                _logger?.LogDebug("websocket receive close: {Status}-{Desc}", receiveResult.CloseStatus, receiveResult.CloseStatusDescription);
+                await CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription);
                 yield break;
             }
 
@@ -70,8 +143,9 @@ public class Connection
                 case WebSocketState.Open:
                     continue;
                 case WebSocketState.CloseReceived or WebSocketState.CloseSent:
-                    await _webSocket.CloseAsync(WebSocketCloseStatus.Empty, "websocket closed",
-                        CancellationToken.None);
+                    await CloseAsync(WebSocketCloseStatus.Empty, "websocket closed");
+                    break;
+                case WebSocketState.Aborted or WebSocketState.Closed:
                     break;
             }
 
