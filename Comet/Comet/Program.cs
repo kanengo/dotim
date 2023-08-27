@@ -1,3 +1,5 @@
+using Comet.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Additional configuration is required to successfully run gRPC on macOS.
@@ -6,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddGrpc();
+
+builder.Services.AddSingleton<InfrastructureService>();
 
 var app = builder.Build();
 

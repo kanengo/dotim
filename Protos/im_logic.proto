@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pb";
+
+package pb;
+
+service ImLogic {
+  rpc ConnectLogin (ConnectLoginRequest) returns (ConnectLoginReply);
+  
+  rpc Heartbeat (HeartbeatRequest) returns (HeartbeatReply);
+}
+
+message ConnectLoginRequest {
+  string userId = 1;
+  string connection_id = 2;
+  string app_id = 3;
+}
+
+message ConnectLoginReply {
+  
+}
+
+
+message HeartbeatRequest {
+  string userId = 1;
+  string connection_id = 2;
+  string app_id = 3;
+}
+
+message HeartbeatReply {
+  
+}

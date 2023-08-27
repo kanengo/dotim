@@ -6,9 +6,9 @@ public class ConnectionManager
 {
     public static ConnectionManager Instance { get; } = new();
     
-    private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, ConcurrentDictionary<string, Connection>>> _connections = new ();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, Connection>>> _connections = new ();
 
-    public bool AddConnection(int appId, string userId, Connection connection)
+    public bool AddConnection(string appId, string userId, Connection connection)
     {
         var appClients = _connections.GetOrAdd(appId, _ => 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, Connection>>());
@@ -19,7 +19,7 @@ public class ConnectionManager
         return userConnections.TryAdd(connection.ConnectionId, connection);
     }
 
-    public bool RemoveConnection(int appId, string userId, string connectionId)
+    public bool RemoveConnection(string appId, string userId, string connectionId)
     {
         if (!_connections.TryGetValue(appId, out var appConnections))
             return false;
@@ -28,7 +28,7 @@ public class ConnectionManager
                userConnections.TryRemove(connectionId, out _);
     }
 
-    public async Task SendMessage(int appId, string userId, ArraySegment<byte> data)
+    public async Task SendMessage(string appId, string userId, ArraySegment<byte> data)
     {
         if (!_connections.TryGetValue(appId, out var appConnections))
             return;

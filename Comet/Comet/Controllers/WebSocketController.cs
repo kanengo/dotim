@@ -4,7 +4,10 @@ using System.Text.Json;
 using Comet.Domains;
 using Microsoft.AspNetCore.Mvc;
 using Comet.Exceptions;
+using Comet.Infrastructure;
+using Microsoft.AspNetCore.Authentication;
 using NanoidDotNet;
+using Pb;
 
 namespace Comet.Controllers;
 
@@ -12,11 +15,15 @@ public class WebSocketController: ControllerBase
 {
     private readonly ILogger<WebSocketController> _logger;
 
+    private readonly InfrastructureService _infrastructureService;
+
     private const int BufferSize = 512; 
 
-    public WebSocketController(ILogger<WebSocketController> logger)
+    public WebSocketController(ILogger<WebSocketController> logger, InfrastructureService infrastructureService)
     {
         _logger = logger;
+
+        _infrastructureService = infrastructureService;
     }
     [Route("/ws_sub")]
     public async Task Connect()
@@ -27,6 +34,9 @@ public class WebSocketController: ControllerBase
             return;
         }
 
+        var appId = "1000001";
+        var userId = "6544";
+        
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
 
         var connection = new ConnectionBuilder().AddLogger(_logger).BufferSize(BufferSize).Build(webSocket);
@@ -42,11 +52,11 @@ public class WebSocketController: ControllerBase
                 _onClose(c.ConnectionId);
             }
         };
-        connection.OnConnectEvent += (sender, args) =>
+        connection.OnConnectEvent += async (sender, args) =>
         {
             if (sender is Connection c)
             {
-                _onConnect(c);
+               await _onConnect(appId,userId,c);
             }
         };
         await connection.Start();
@@ -86,9 +96,16 @@ public class WebSocketController: ControllerBase
         }
     }
     
-    private void _onConnect(Connection connection)
+    private async Task _onConnect(string appId, string userId, Connection connection)
     {
         _logger.LogDebug("connection connect:{}", connection.ConnectionId);
+
+        await _infrastructureService.ImLogic.ConnectLoginAsync(new ConnectLoginRequest
+        {
+            ConnectionId = connection.ConnectionId,
+            UserId = userId,
+            AppId = appId,
+        });
     }
 
 
