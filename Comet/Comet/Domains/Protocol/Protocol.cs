@@ -90,9 +90,6 @@ public class Protocol
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
-
-        return default;
     }
     
 }

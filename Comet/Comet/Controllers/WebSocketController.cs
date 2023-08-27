@@ -1,12 +1,9 @@
-using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using Comet.Domains;
 using Microsoft.AspNetCore.Mvc;
 using Comet.Exceptions;
 using Comet.Infrastructure;
-using Microsoft.AspNetCore.Authentication;
-using NanoidDotNet;
 using Pb;
 
 namespace Comet.Controllers;
@@ -40,16 +37,16 @@ public class WebSocketController: ControllerBase
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
 
         var connection = new ConnectionBuilder().AddLogger(_logger).BufferSize(BufferSize).Build(webSocket);
-        connection.OnDataEvent += (sender, args) =>
+        connection.OnDataEvent += async (sender, args) =>
         {
             if (sender is Connection c)
-                _onData(c, args);
+               await _onData(appId, userId, c, args);
         };
-        connection.OnCloseEvent += (sender, args) =>
+        connection.OnCloseEvent += async (sender, args) =>
         {
             if (sender is Connection c)
             {
-                _onClose(c.ConnectionId);
+                await _onClose(appId, userId, c.ConnectionId);
             }
         };
         connection.OnConnectEvent += async (sender, args) =>
@@ -62,7 +59,7 @@ public class WebSocketController: ControllerBase
         await connection.Start();
     }
 
-    private void _onData(Connection connection, Connection.OnDataEventArgs args)
+    private async Task _onData(string appId, string userId, Connection connection, Connection.OnDataEventArgs args)
     {
         var data = args.Data;
         try
@@ -79,7 +76,7 @@ public class WebSocketController: ControllerBase
             switch (packet.Method)
             {
                 case "heartbeat":
-                    // await _heartbeat();
+                    await _heartbeat(appId, userId, connection);
                     break;
             }
         }
@@ -100,7 +97,7 @@ public class WebSocketController: ControllerBase
     {
         _logger.LogDebug("connection connect:{}", connection.ConnectionId);
 
-        await _infrastructureService.ImLogic.ConnectLoginAsync(new ConnectLoginRequest
+        await _infrastructureService.ImLogic.ConnectAsync(new ConnectRequest
         {
             ConnectionId = connection.ConnectionId,
             UserId = userId,
@@ -109,13 +106,24 @@ public class WebSocketController: ControllerBase
     }
 
 
-    private void _onClose(string connectionId)
+    private async Task _onClose(string appId, string userId, string connectionId)
     {
-        _logger.LogDebug("connection closed:{}", connectionId);
+        _logger.LogDebug("connection closed:{ConnectionId}", connectionId);
+        await _infrastructureService.ImLogic.DisConnectAsync(new DisConnectRequest
+        {
+            AppId = appId,
+            UserId = userId,
+            ConnectionId = connectionId
+        });
     }
 
-    private async Task _heartbeat()
+    private async Task _heartbeat(string appId, string userId, Connection c)
     {
-        await Task.CompletedTask;
+        await _infrastructureService.ImLogic.HeartbeatAsync(new HeartbeatRequest
+        {
+            UserId = appId,
+            ConnectionId = c.ConnectionId,
+            AppId = appId
+        });
     }
 }

@@ -99,7 +99,7 @@ public class RingBuffer
                     {
                         return _current == 0 ? _separation.Head[_index] : _separation.Tail[_index];
                     }
-                    catch (IndexOutOfRangeException ex)
+                    catch (IndexOutOfRangeException)
                     {
                         throw new InvalidOperationException();
                     }

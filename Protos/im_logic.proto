@@ -5,18 +5,20 @@ option csharp_namespace = "Pb";
 package pb;
 
 service ImLogic {
-  rpc ConnectLogin (ConnectLoginRequest) returns (ConnectLoginReply);
+  rpc Connect (ConnectRequest) returns (ConnectReply);
   
   rpc Heartbeat (HeartbeatRequest) returns (HeartbeatReply);
+  
+  rpc DisConnect (DisConnectRequest) returns (DisConnectReply);
 }
 
-message ConnectLoginRequest {
+message ConnectRequest {
   string userId = 1;
   string connection_id = 2;
   string app_id = 3;
 }
 
-message ConnectLoginReply {
+message ConnectReply {
   
 }
 
@@ -29,4 +31,14 @@ message HeartbeatRequest {
 
 message HeartbeatReply {
   
+}
+
+message DisConnectRequest {
+  string userId = 1;
+  string connection_id = 2;
+  string app_id = 3;
+}
+
+message DisConnectReply {
+
 }
