@@ -14,7 +14,8 @@ public class ImLogicService : Pb.ImLogic.ImLogicBase
     }
 
     public override Task<AuthenticateReply> Authenticate(AuthenticateRequest request, ServerCallContext context)
-    {   
+    {
+        _logger.LogDebug("Authenticate Token:{}", request.Token);
         return Task.FromResult(new AuthenticateReply
         {
             AppId = "1001",

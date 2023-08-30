@@ -43,6 +43,9 @@ public class WebSocketController: ControllerBase
             authenticateReply = await _infrastructureService.ImLogicClient.AuthenticateAsync(new AuthenticateRequest
             {
                 Token = token
+            }, new Metadata
+            {
+                {"dapr-app-id","imlogic"}
             });
         }
         catch (RpcException ex) when(ex.StatusCode == Grpc.Core.StatusCode.Unauthenticated)
@@ -124,7 +127,7 @@ public class WebSocketController: ControllerBase
     
     private async Task _onConnect(Connection connection)
     {
-        _logger.LogDebug("connection connect:{}", connection.ConnectionId);
+        _logger.LogDebug("connection connect:{}-{}",connection.UserId, connection.ConnectionId);
         var linkConnectEvent = new LinkStateEvent
         {
             Metadata = 
@@ -142,7 +145,7 @@ public class WebSocketController: ControllerBase
 
     private async Task _onClose(Connection connection)
     {
-        _logger.LogDebug("connection closed:{ConnectionId}", connection.ConnectionId);
+        _logger.LogDebug("connection closed:{UserId}-{ConnectionId}", connection.UserId,connection.ConnectionId);
         var linkConnectEvent = new LinkStateEvent
         {
             Metadata = 
@@ -160,7 +163,7 @@ public class WebSocketController: ControllerBase
 
     private async Task _heartbeat(Connection connection)
     {
-        _logger.LogDebug("connection closed:{ConnectionId}", connection.ConnectionId);
+        _logger.LogDebug("heartbeat:{UserId}-{ConnectionId}", connection.UserId,connection.ConnectionId);
         var linkConnectEvent = new LinkStateEvent
         {
             Metadata = 
