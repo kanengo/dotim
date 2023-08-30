@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pb";
+
+package pb;
+
+import "common.proto";
+
+enum LinkState {
+  LINK_STATE_NONE = 0;
+  LINK_STATE_CONNECT = 1;
+  LINK_STATE_DISCONNECT = 2;
+  LINK_STATE_Heartbeat= 3;
+}
+
+enum LinkMetadataType {
+  LINK_METADATA_TYPE_NONE = 0;
+  LINK_METADATA_TYPE_USER_ID = 1;
+  LINK_METADATA_TYPE_DEVICE_TYPE = 2;
+  LINK_METADATA_TYPE_CLIENT_IP = 3;
+  LINK_METADATA_TYPE_CONNECTION_ID = 4;
+  LINK_METADATA_TYPE_APP_ID = 5;
+}
+
+message LinkStateEvent {
+  LinkState state = 5; 
+  map<string,string> metadata = 6;
+}

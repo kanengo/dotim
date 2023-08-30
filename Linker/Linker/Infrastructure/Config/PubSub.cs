@@ -1,0 +1,1 @@
+namespace Linker.Infrastructure.Config;

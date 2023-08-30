@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pb";
+
+package pb;
+
+message RequestPacket {
+  string method = 1;
+  map<string, string> metadata = 2;
+  string data = 3;
+}
+
+enum PushMessageType {
+    PUSH_MESSAGE_TYPE_RESPONSE = 0;
+    PUSH_MESSAGE_TYPE_PUSH = 1;
+}
+
+message PushMessage {
+  PushMessageType type = 1;
+  int32 push_id = 2;
+  bytes data = 3;
+}

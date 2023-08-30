@@ -4,41 +4,18 @@ option csharp_namespace = "Pb";
 
 package pb;
 
+import "common.proto";
+
 service ImLogic {
-  rpc Connect (ConnectRequest) returns (ConnectReply);
-  
-  rpc Heartbeat (HeartbeatRequest) returns (HeartbeatReply);
-  
-  rpc DisConnect (DisConnectRequest) returns (DisConnectReply);
+  rpc Authenticate (AuthenticateRequest) returns (AuthenticateReply);
 }
 
-message ConnectRequest {
-  string userId = 1;
-  string connection_id = 2;
-  string app_id = 3;
+message AuthenticateRequest {
+  string token = 1;
 }
 
-message ConnectReply {
-  
-}
-
-
-message HeartbeatRequest {
-  string userId = 1;
-  string connection_id = 2;
-  string app_id = 3;
-}
-
-message HeartbeatReply {
-  
-}
-
-message DisConnectRequest {
-  string userId = 1;
-  string connection_id = 2;
-  string app_id = 3;
-}
-
-message DisConnectReply {
-
+message AuthenticateReply {
+  string app_id = 1;
+  string user_id = 2;
+  DeviceType device_type = 3;
 }

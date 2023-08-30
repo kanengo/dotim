@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapr.Client" Version="1.11.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
+        <PackageReference Include="Nanoid" Version="3.0.0" />
+        <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="..\..\Protos\linker.proto"/>
+        <Protobuf Include="..\..\Protos\linker.pubsub.proto" />
+        <Protobuf Include="..\..\Protos\common.proto" />
+        <Protobuf Include="..\..\Protos\im_logic.proto" GrpcServices="Client"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+
+
+    <ItemGroup>
+      <Folder Include="Services\" />
+    </ItemGroup>
+
+</Project>

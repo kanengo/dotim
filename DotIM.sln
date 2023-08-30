@@ -14,9 +14,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared\Sha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Tests", "Shared\Shared.Tests\Shared.Tests.csproj", "{DD64F91F-8355-40BF-A343-40770F6DBC69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Comet", "Comet\Comet\Comet.csproj", "{2F747FE8-1C32-434D-B464-2C67E56F7926}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linker", "Linker\Linker\Linker.csproj", "{2F747FE8-1C32-434D-B464-2C67E56F7926}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Comet.Tests", "Comet\Comet.Tests\Comet.Tests.csproj", "{A92E2C8C-1BF9-4B1A-A4AE-90A712B44C7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linker.Tests", "Linker\Linker.Tests\Linker.Tests.csproj", "{A92E2C8C-1BF9-4B1A-A4AE-90A712B44C7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImLogic", "ImLogic\ImLogic\ImLogic.csproj", "{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,5 +62,9 @@ Global
 		{A92E2C8C-1BF9-4B1A-A4AE-90A712B44C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A92E2C8C-1BF9-4B1A-A4AE-90A712B44C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A92E2C8C-1BF9-4B1A-A4AE-90A712B44C7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
