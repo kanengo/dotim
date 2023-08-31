@@ -35,7 +35,7 @@ public class InfrastructureService
 
         DaprClient = daprClientBuilder.Build();
 
-        PusSubName = configuration["PubSub:Name"] ?? "pulsar";
+        PusSubName = configuration["PubSub:Name"] ?? "pubsub";
     }
     
     public async Task PublishLinkStateEventAsync(IMessage<LinkStateEvent> data, Dictionary<string, string> metadata = default!)
