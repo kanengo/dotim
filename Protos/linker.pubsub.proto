@@ -27,3 +27,10 @@ message LinkStateEvent {
   LinkState state = 5; 
   map<string,string> metadata = 6;
 }
+
+
+message OnPushUsers {
+  string app_id = 1;
+  repeated string user_ids = 2;
+  bytes data = 3;
+}
