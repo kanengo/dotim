@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using Google.Protobuf;
-using Google.Protobuf.Collections;
+using Dapr;
 using Grpc.Core;
 using Linker.Domains;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +17,11 @@ public class WebSocketController: ControllerBase
     private readonly InfrastructureService _infrastructureService;
 
     private const int BufferSize = 512;
-    public WebSocketController(ILogger<WebSocketController> logger,IConfiguration configuration, InfrastructureService infrastructureService)
+    public WebSocketController(ILogger<WebSocketController> logger,InfrastructureService infrastructureService)
     {
         _logger = logger;
 
         _infrastructureService = infrastructureService;
-        
     }
     [Route("/ws_sub")]
     public async Task Connect()
@@ -35,8 +33,12 @@ public class WebSocketController: ControllerBase
         }
 
         var token = HttpContext.Request.Headers.Authorization;
-
-
+        if (token.Count == 0)
+        {
+            HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+     
         AuthenticateReply authenticateReply;
         try
         {
@@ -136,6 +138,7 @@ public class WebSocketController: ControllerBase
                 {LinkMetadataType.UserId.ToString(),connection.UserId},
                 {LinkMetadataType.ConnectionId.ToString(),connection.ConnectionId},
                 {LinkMetadataType.DeviceType.ToString(),connection.DeviceType.ToString()},
+                {LinkMetadataType.InstanceId.ToString(),ServiceIdentity.Instance.UniqueId},
             },
             State = LinkState.Connect,
         };

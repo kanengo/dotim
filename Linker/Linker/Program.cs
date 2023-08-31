@@ -1,4 +1,5 @@
 using Linker.Infrastructure;
+using Linker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +22,15 @@ var webSocketOptions = new WebSocketOptions
 };
 app.UseWebSockets(webSocketOptions);
 
+app.MapControllers();
+
+app.MapGrpcService<DaprAppCallbackService>();
+app.MapGrpcService<DaprAppCallbackHealthCheckService>();
 
 // Configure the HTTP request pipeline.
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
-app.MapControllers();
 
 app.Run();
