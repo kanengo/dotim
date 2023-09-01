@@ -1,12 +1,12 @@
 using System.Text;
 using System.Text.Json;
-using Dapr;
 using Grpc.Core;
 using Linker.Domains;
 using Microsoft.AspNetCore.Mvc;
 using Linker.Exceptions;
 using Linker.Infrastructure;
 using Pb;
+using Shared.Topics;
 
 namespace Linker.Controllers;
 
@@ -16,12 +16,16 @@ public class WebSocketController: ControllerBase
 
     private readonly InfrastructureService _infrastructureService;
 
+    private readonly IConfiguration _configuration;
+
     private const int BufferSize = 512;
-    public WebSocketController(ILogger<WebSocketController> logger,InfrastructureService infrastructureService)
+    public WebSocketController(ILogger<WebSocketController> logger,InfrastructureService infrastructureService, IConfiguration configuration)
     {
         _logger = logger;
 
         _infrastructureService = infrastructureService;
+
+        _configuration = configuration;
     }
     [Route("/ws_sub")]
     public async Task Connect()
@@ -130,54 +134,59 @@ public class WebSocketController: ControllerBase
     private async Task _onConnect(Connection connection)
     {
         _logger.LogDebug("connection connect:{}-{}",connection.UserId, connection.ConnectionId);
+        var metadata = new Dictionary<string, string>
+        {
+            {"cloudevent.source",string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
+            {"cloudevent.type", CloudEventType.Linker.LinkStateConnect},
+        };
         var linkConnectEvent = new LinkStateEvent
         {
-            Metadata = 
-            {
-                {LinkMetadataType.AppId.ToString(),connection.AppId},
-                {LinkMetadataType.UserId.ToString(),connection.UserId},
-                {LinkMetadataType.ConnectionId.ToString(),connection.ConnectionId},
-                {LinkMetadataType.DeviceType.ToString(),connection.DeviceType.ToString()},
-                {LinkMetadataType.InstanceId.ToString(),ServiceIdentity.Instance.UniqueId},
-            },
-            State = LinkState.Connect,
+            AppId = connection.AppId,
+            UserId = connection.UserId,
+            DeviceType = connection.DeviceType,
+            ConnectionId = connection.ConnectionId,
+            InstanceId = ServiceIdentity.Instance.UniqueId,
         };
-        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent);
+        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent, metadata);
     }
 
 
     private async Task _onClose(Connection connection)
     {
         _logger.LogDebug("connection closed:{UserId}-{ConnectionId}", connection.UserId,connection.ConnectionId);
+        var metadata = new Dictionary<string, string>
+        {
+            {"cloudevent.source", string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
+            {"cloudevent.type", CloudEventType.Linker.LinkStateDisconnect},
+        };
         var linkConnectEvent = new LinkStateEvent
         {
-            Metadata = 
-            {
-                {LinkMetadataType.AppId.ToString(),connection.AppId},
-                {LinkMetadataType.UserId.ToString(),connection.UserId},
-                {LinkMetadataType.ConnectionId.ToString(),connection.ConnectionId},
-                {LinkMetadataType.DeviceType.ToString(),connection.DeviceType.ToString()},
-            },
-            State = LinkState.Disconnect,
+            AppId = connection.AppId,
+            UserId = connection.UserId,
+            DeviceType = connection.DeviceType,
+            ConnectionId = connection.ConnectionId,
+            InstanceId = ServiceIdentity.Instance.UniqueId,
         };
-        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent);
+        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
         
     }
 
     private async Task _heartbeat(Connection connection)
     {
         _logger.LogDebug("heartbeat:{UserId}-{ConnectionId}", connection.UserId,connection.ConnectionId);
+        var metadata = new Dictionary<string, string>
+        {
+            {"cloudevent.source", string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
+            {"cloudevent.type", CloudEventType.Linker.LinkStateHeartbeat},
+        };
         var linkConnectEvent = new LinkStateEvent
         {
-            Metadata = 
-            {
-                {LinkMetadataType.AppId.ToString(),connection.AppId},
-                {LinkMetadataType.UserId.ToString(),connection.UserId},
-                {LinkMetadataType.ConnectionId.ToString(),connection.ConnectionId},
-                {LinkMetadataType.DeviceType.ToString(),connection.DeviceType.ToString()},
-            },
-            State = LinkState.Heartbeat,
+            AppId = connection.AppId,
+            UserId = connection.UserId,
+            DeviceType = connection.DeviceType,
+            ConnectionId = connection.ConnectionId,
+            InstanceId = ServiceIdentity.Instance.UniqueId,
         };
-        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent);
+        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
     }
 }

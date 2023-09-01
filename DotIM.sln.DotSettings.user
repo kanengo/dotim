@@ -4,4 +4,6 @@
     &lt;TestId&gt;NUnit3x::A92E2C8C-1BF9-4B1A-A4AE-90A712B44C7E::net7.0::Linker.Tests.RingBufferTest.TestPbJson&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=dapr/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=cloudevent/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=dapr/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=pubsub/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

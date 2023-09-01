@@ -16,6 +16,8 @@ public class Connection
 
     private readonly CancellationTokenSource _cts;
 
+    private bool stopped = false;
+
     public event EventHandler<OnDataEventArgs>? OnDataEvent;
     public event EventHandler? OnCloseEvent;
 
@@ -56,6 +58,10 @@ public class Connection
 
     public async Task Start()
     {
+        if (stopped)
+        {
+            return;
+        }
         try
         {   
             OnConnectEvent?.Invoke(this, EventArgs.Empty);
@@ -100,16 +106,26 @@ public class Connection
 
     private async Task CloseAsync(WebSocketCloseStatus webSocketCloseStatus, string? statusDescription)
     {
+        if (stopped)
+        {
+            return;
+        }
         if (_webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived or WebSocketState.CloseSent)
         {
             await _webSocket.CloseAsync(webSocketCloseStatus, statusDescription,
                 CancellationToken.None);
         }
+
+        stopped = true;
         OnCloseEvent?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task SendMessage(ArraySegment<byte> data)
     {
+        if (stopped)
+        {
+            return;
+        }
         await _webSocket.SendAsync(data, WebSocketMessageType.Binary, true, _cts.Token);
     }
 

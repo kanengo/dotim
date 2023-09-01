@@ -24,8 +24,11 @@ enum LinkMetadataType {
 }
 
 message LinkStateEvent {
-  LinkState state = 5; 
-  map<string,string> metadata = 6;
+  string app_id = 1;
+  string user_id = 2;
+  DeviceType device_type = 3;
+  string connection_id = 4;
+  string instance_id = 5;
 }
 
 
@@ -33,4 +36,5 @@ message OnPushUsers {
   string app_id = 1;
   repeated string user_ids = 2;
   bytes data = 3;
+  int32 qos = 4;
 }

@@ -3,6 +3,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Linker.Domains;
 using Linker.Infrastructure;
+using Pb;
 
 namespace Linker.Services;
 
@@ -11,6 +12,9 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
     private readonly ILogger<DaprAppCallbackService> _logger;
 
     private readonly InfrastructureService _infrastructureService;
+
+
+    private const string EventTypePushUsers = "nim.linker.push.users";
     
     public DaprAppCallbackService(ILogger<DaprAppCallbackService> logger,InfrastructureService infrastructureService)
     {
@@ -28,7 +32,7 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
                 new TopicSubscription
                 {
                     PubsubName = _infrastructureService.PusSubName,
-                    Topic = $"{_infrastructureService.Configuration["AppName"]}/{_infrastructureService.Configuration["ServiceName"]}/{ServiceIdentity.Instance.UniqueId}",
+                    Topic = $"{_infrastructureService.Configuration["Namespace"]}/{_infrastructureService.Configuration["ServiceName"]}/{ServiceIdentity.Instance.UniqueId}",
                     Routes = null,
                     DeadLetterTopic = null,
                     BulkSubscribe = new BulkSubscribeConfig
@@ -43,9 +47,20 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
         return Task.FromResult(response);
     }
 
-    public override Task<TopicEventResponse> OnTopicEvent(TopicEventRequest request, ServerCallContext context)
+    public override async Task<TopicEventResponse> OnTopicEvent(TopicEventRequest request, ServerCallContext context)
     {
-        return base.OnTopicEvent(request, context);
+        switch (request.Type)
+        {
+            case EventTypePushUsers:
+                var data = OnPushUsers.Parser.ParseFrom(request.Data);
+                await ConnectionManager.Instance.SendMessageByUserIds(data.AppId, data.UserIds, data.Data.ToByteArray());
+                break;
+        }
+
+        return new TopicEventResponse
+        {
+            Status = TopicEventResponse.Types.TopicEventResponseStatus.Success
+        };
     }
     
     

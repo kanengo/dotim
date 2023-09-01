@@ -2,6 +2,7 @@ using Dapr.Client;
 using Google.Protobuf;
 using Grpc.Net.Client;
 using Pb;
+using Shared.Topics;
 
 
 namespace Linker.Infrastructure;
@@ -10,7 +11,6 @@ public class InfrastructureService
 {
     public DaprClient DaprClient { get; }
     
-        
     public  string PusSubName { get; }
 
     public IConfiguration Configuration { get; }
@@ -39,15 +39,15 @@ public class InfrastructureService
     }
     
     public async Task PublishLinkStateEventAsync(IMessage<LinkStateEvent> data, Dictionary<string, string> metadata = default!)
-    {
-        await PublishByteEventAsync($"{Configuration["AppName"]}/{Configuration["ServiceName"]}", data.ToByteArray(),
+    {   
+        
+        await _publishByteEventAsync(string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"],Configuration["ServiceName"]), data.ToByteArray(),
             metadata);
     }
 
-    public async Task PublishByteEventAsync(string topicName, ReadOnlyMemory<byte> data, Dictionary<string, string> metadata = default!,
+    private async Task _publishByteEventAsync(string topicName, ReadOnlyMemory<byte> data, Dictionary<string, string> metadata = default!,
         CancellationToken cancellationToken = default)
     {
-        await DaprClient.PublishByteEventAsync(PusSubName, topicName, data, "application/grpc",
-            metadata, cancellationToken);
+        await DaprClient.PublishByteEventAsync(PusSubName, topicName, data,metadata:metadata, cancellationToken:cancellationToken);
     }
 }

@@ -41,4 +41,22 @@ public class ConnectionManager
             await connection.SendMessage(data);
         }
     }
+    
+    public async Task SendMessageByUserIds(string appId, IEnumerable<string> userIds, ArraySegment<byte> data)
+    {
+        if (!_connections.TryGetValue(appId, out var appConnections))
+            return;
+        
+        foreach (var userId in userIds)
+        {
+            if (!appConnections.TryGetValue(userId, out var userConnections))
+                return;
+        
+            foreach (var (_, connection) in userConnections)
+            {
+                await connection.SendMessage(data);
+            }
+        }
+       
+    }
 }
