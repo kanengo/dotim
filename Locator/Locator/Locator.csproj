@@ -9,6 +9,8 @@
 
     <ItemGroup>
         <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
+        <Protobuf Include="..\..\Protos\linker.pubsub.proto" />
+        <Protobuf Include="..\..\Protos\common.proto" />
     </ItemGroup>
 
     <ItemGroup>

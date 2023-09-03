@@ -1,7 +1,8 @@
+using System.Text.Json;
 using Dapr.AppCallback.Autogen.Grpc.v1;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-
+using Pb;
 using Shared.Topics;
 using static Shared.Topics.CloudEventType;
 
@@ -48,8 +49,8 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
         switch (request.Type)
         {
             case Linker.LinkStateConnect:
-                _logger.LogDebug("OnTopicEvent:{}", Linker.LinkStateConnect);
-                
+                // var eventData = LinkStateEvent.Parser.ParseFrom(request.Data);
+                _logger.LogDebug("OnTopicEvent:{} UserId:{}", Linker.LinkStateConnect, request.Data);;
                 break;
         }
 
