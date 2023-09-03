@@ -44,22 +44,28 @@ public class WebSocketController: ControllerBase
         }
      
         AuthenticateReply authenticateReply;
-        try
+        // try
+        // {
+        //     authenticateReply = await _infrastructureService.ImLogicClient.AuthenticateAsync(new AuthenticateRequest
+        //     {
+        //         Token = token
+        //     }, new Metadata
+        //     {
+        //         {"dapr-app-id","imlogic"}
+        //     });
+        // }
+        // catch (RpcException ex) when(ex.StatusCode == Grpc.Core.StatusCode.Unauthenticated)
+        // {
+        //     HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        //     return;
+        // }
+
+        authenticateReply = new AuthenticateReply
         {
-            authenticateReply = await _infrastructureService.ImLogicClient.AuthenticateAsync(new AuthenticateRequest
-            {
-                Token = token
-            }, new Metadata
-            {
-                {"dapr-app-id","imlogic"}
-            });
-        }
-        catch (RpcException ex) when(ex.StatusCode == Grpc.Core.StatusCode.Unauthenticated)
-        {
-            HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return;
-        }
-      
+            AppId = "1001",
+            UserId = "6544",
+            DeviceType = DeviceType.Web,
+        };
         
         var appId = authenticateReply.AppId;
         var userId = authenticateReply.UserId;
@@ -167,6 +173,7 @@ public class WebSocketController: ControllerBase
             ConnectionId = connection.ConnectionId,
             InstanceId = ServiceIdentity.Instance.UniqueId,
         };
+        ConnectionManager.Instance.RemoveConnection(connection.AppId, connection.UserId, connection.ConnectionId);
         await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
         
     }

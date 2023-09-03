@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linker.Tests", "Linker\Link
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImLogic", "ImLogic\ImLogic\ImLogic.csproj", "{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locator", "Locator\Locator\Locator.csproj", "{5F89151E-DC7B-42A8-B0BB-C34888F44059}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DFA53CA-C6CA-4968-9860-149DE3BA3A81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F89151E-DC7B-42A8-B0BB-C34888F44059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F89151E-DC7B-42A8-B0BB-C34888F44059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F89151E-DC7B-42A8-B0BB-C34888F44059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F89151E-DC7B-42A8-B0BB-C34888F44059}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

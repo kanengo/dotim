@@ -33,8 +33,6 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
                 {
                     PubsubName = _infrastructureService.PusSubName,
                     Topic = $"{_infrastructureService.Configuration["Namespace"]}/{_infrastructureService.Configuration["ServiceName"]}/{ServiceIdentity.Instance.UniqueId}",
-                    Routes = null,
-                    DeadLetterTopic = null,
                     BulkSubscribe = new BulkSubscribeConfig
                     {
                         Enabled = true,

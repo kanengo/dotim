@@ -41,13 +41,14 @@ public class InfrastructureService
     public async Task PublishLinkStateEventAsync(IMessage<LinkStateEvent> data, Dictionary<string, string> metadata = default!)
     {   
         
-        await _publishByteEventAsync(string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"],Configuration["ServiceName"]), data.ToByteArray(),
+        await _publishByteEventAsync(string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"]), data.ToByteArray(),
             metadata);
     }
 
     private async Task _publishByteEventAsync(string topicName, ReadOnlyMemory<byte> data, Dictionary<string, string> metadata = default!,
         CancellationToken cancellationToken = default)
     {
+        // DaprClient.BulkPublishEventAsync()
         await DaprClient.PublishByteEventAsync(PusSubName, topicName, data,metadata:metadata, cancellationToken:cancellationToken);
     }
 }
