@@ -143,8 +143,9 @@ public class WebSocketController: ControllerBase
         var metadata = new Dictionary<string, string>
         {
             {"cloudevent.source",string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
-            {"cloudevent.type", CloudEventType.Linker.LinkStateConnect},
+            // {"cloudevent.type", CloudEventType.Linker.LinkStateConnect},
         };
+        ConnectionManager.Instance.AddConnection(connection);
         var linkConnectEvent = new LinkStateEvent
         {
             AppId = connection.AppId,
@@ -152,6 +153,7 @@ public class WebSocketController: ControllerBase
             DeviceType = connection.DeviceType,
             ConnectionId = connection.ConnectionId,
             InstanceId = ServiceIdentity.Instance.UniqueId,
+            State = LinkState.Connect,
         };
         await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent, metadata);
     }
@@ -163,8 +165,8 @@ public class WebSocketController: ControllerBase
         var metadata = new Dictionary<string, string>
         {
             {"cloudevent.source", string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
-            {"cloudevent.type", CloudEventType.Linker.LinkStateDisconnect},
         };
+        ConnectionManager.Instance.RemoveConnection(connection.AppId, connection.UserId, connection.ConnectionId);
         var linkConnectEvent = new LinkStateEvent
         {
             AppId = connection.AppId,
@@ -172,8 +174,8 @@ public class WebSocketController: ControllerBase
             DeviceType = connection.DeviceType,
             ConnectionId = connection.ConnectionId,
             InstanceId = ServiceIdentity.Instance.UniqueId,
+            State = LinkState.Disconnect,
         };
-        ConnectionManager.Instance.RemoveConnection(connection.AppId, connection.UserId, connection.ConnectionId);
         await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
         
     }
@@ -184,7 +186,6 @@ public class WebSocketController: ControllerBase
         var metadata = new Dictionary<string, string>
         {
             {"cloudevent.source", string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
-            {"cloudevent.type", CloudEventType.Linker.LinkStateHeartbeat},
         };
         var linkConnectEvent = new LinkStateEvent
         {
@@ -193,6 +194,7 @@ public class WebSocketController: ControllerBase
             DeviceType = connection.DeviceType,
             ConnectionId = connection.ConnectionId,
             InstanceId = ServiceIdentity.Instance.UniqueId,
+            State = LinkState.Heartbeat,
         };
         await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
     }

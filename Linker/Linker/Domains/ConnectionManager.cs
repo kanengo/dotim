@@ -8,12 +8,12 @@ public class ConnectionManager
     
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, Connection>>> _connections = new ();
 
-    public bool AddConnection(string appId, string userId, Connection connection)
+    public bool AddConnection(Connection connection)
     {
-        var appClients = _connections.GetOrAdd(appId, _ => 
+        var appClients = _connections.GetOrAdd(connection.AppId, _ => 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, Connection>>());
         
-        var userConnections = appClients.GetOrAdd(userId, _ => 
+        var userConnections = appClients.GetOrAdd(connection.UserId, _ => 
             new ConcurrentDictionary<string, Connection>());
         
         return userConnections.TryAdd(connection.ConnectionId, connection);

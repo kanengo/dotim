@@ -29,6 +29,7 @@ message LinkStateEvent {
   DeviceType device_type = 3;
   string connection_id = 4;
   string instance_id = 5;
+  LinkState state = 6;
 }
 
 

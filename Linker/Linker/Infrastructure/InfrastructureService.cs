@@ -17,6 +17,8 @@ public class InfrastructureService
     
     public ImLogic.ImLogicClient ImLogicClient { get; }
 
+    private Dapr.Client.Autogen.Grpc.v1.Dapr.DaprClient _daprGrpcClient;
+
     public InfrastructureService(IConfiguration configuration)
     {
         Configuration = configuration;
@@ -27,6 +29,8 @@ public class InfrastructureService
         var channel = GrpcChannel.ForAddress(configuration["Rpc:GrpcAddress"] ?? string.Empty);
 
         ImLogicClient = new ImLogic.ImLogicClient(channel);
+
+        _daprGrpcClient =  new Dapr.Client.Autogen.Grpc.v1.Dapr.DaprClient(channel);
         
         if (grpcAddress is not null)
         {

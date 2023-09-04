@@ -8,14 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
-        <Protobuf Include="..\..\Protos\linker.pubsub.proto" />
-        <Protobuf Include="..\..\Protos\common.proto" />
+        <Protobuf Include="..\..\Protos\linker.pubsub.proto" GrpcServices="None"/>
+        <Protobuf Include="..\..\Protos\common.proto" GrpcServices="None"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Dapr.Client" Version="1.11.0" />
-        <PackageReference Include="Grpc.AspNetCore" Version="2.52.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -26,10 +25,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Shared\Shared\Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Domains\" />
     </ItemGroup>
 
 </Project>
