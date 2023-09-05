@@ -22,8 +22,12 @@ public class InfrastructureService
 
     private readonly BulkOperator<BulkPublishRequestEntry> _linkBulkPub;
 
-    public InfrastructureService(IConfiguration configuration)
+    private readonly ILogger<InfrastructureService> _logger;
+
+    public InfrastructureService(IConfiguration configuration, ILogger<InfrastructureService> logger)
     {
+        _logger = logger;
+        
         Configuration = configuration;
         var daprClientBuilder = new DaprClientBuilder();
 
@@ -55,9 +59,11 @@ public class InfrastructureService
         var data = new BulkPublishRequest
         {
             PubsubName = Configuration["Pubsub:Name"],
-            Topic = string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"])
+            Topic = string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"]),
         };
         data.Entries.AddRange(entries);
+        
+        _logger.LogDebug("_linkPubBulkHandler");
         
         await _daprGrpcClient.BulkPublishEventAlpha1Async(data);
     }
@@ -72,7 +78,7 @@ public class InfrastructureService
                 // ReSharper disable once MethodHasAsyncOverload
                 EntryId = Nanoid.Generate(),
                 Event = message.ToByteString(),
-                ContentType = null
+                ContentType = "application/octet-stream"
             };
             
             await _linkBulkPub.WriteAsync(entry);

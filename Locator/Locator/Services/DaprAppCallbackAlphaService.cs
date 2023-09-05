@@ -28,8 +28,8 @@ public class DaprAppCallbackAlphaService : AppCallbackAlpha.AppCallbackAlphaBase
         _logger.LogDebug("OnBulkTopicEventAlpha1 Topic:{} Type:{}", request.Topic, request.Type);
         
         foreach (var t in request.Entries)
-        {
-            
+        {   
+            _logger.LogDebug("OnBulkTopicEventAlpha1 entries: {0}", t);
             response.Statuses.Add(new TopicEventBulkResponseEntry
             {
                 Status = TopicEventResponse.Types.TopicEventResponseStatus.Success,
