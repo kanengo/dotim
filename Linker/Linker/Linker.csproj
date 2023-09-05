@@ -33,4 +33,8 @@
 
 
 
+    <ItemGroup>
+      <Folder Include="Domains\Bulk\" />
+    </ItemGroup>
+
 </Project>

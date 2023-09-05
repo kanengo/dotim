@@ -37,5 +37,6 @@ public class InfrastructureService
     public async Task SaveState<TValue>(string key, TValue value,  IReadOnlyDictionary<string, string> metadata = default!)
     {
         await DaprClient.SaveStateAsync(Configuration["StateStores:Name"], key, value, metadata:metadata);
+    
     }
 }

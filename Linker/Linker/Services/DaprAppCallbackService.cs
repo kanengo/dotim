@@ -31,7 +31,7 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
             {
                 new TopicSubscription
                 {
-                    PubsubName = _infrastructureService.PusSubName,
+                    PubsubName = _infrastructureService.Configuration["PubSub:Name"],
                     Topic = $"{_infrastructureService.Configuration["Namespace"]}/{_infrastructureService.Configuration["ServiceName"]}/{ServiceIdentity.Instance.UniqueId}",
                     BulkSubscribe = new BulkSubscribeConfig
                     {

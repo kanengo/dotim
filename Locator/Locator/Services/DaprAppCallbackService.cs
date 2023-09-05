@@ -32,12 +32,12 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
                 {
                     PubsubName = _configuration["PubSub:Name"],
                     Topic = string.Format(CloudEventTopics.Linker.LinkStateChange, _configuration["Namespace"]),
-                    // BulkSubscribe = new BulkSubscribeConfig
-                    // {
-                    //     Enabled = true,
-                    //     MaxMessagesCount = 100,
-                    //     MaxAwaitDurationMs = 100,
-                    // }
+                    BulkSubscribe = new BulkSubscribeConfig
+                    {
+                        Enabled = true,
+                        MaxMessagesCount = 100,
+                        MaxAwaitDurationMs = 100,
+                    }
                 },
             }
         };

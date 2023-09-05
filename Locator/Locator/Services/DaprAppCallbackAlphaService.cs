@@ -26,16 +26,10 @@ public class DaprAppCallbackAlphaService : AppCallbackAlpha.AppCallbackAlphaBase
         var response = new TopicEventBulkResponse();
         
         _logger.LogDebug("OnBulkTopicEventAlpha1 Topic:{} Type:{}", request.Topic, request.Type);
-        switch (request.Type)
-        {
-            case Linker.LinkStateConnect:
-                _logger.LogDebug("OnBulkTopicEventAlpha1:{}", Linker.LinkStateConnect);
-                break;
-            
-        }
         
         foreach (var t in request.Entries)
         {
+            
             response.Statuses.Add(new TopicEventBulkResponseEntry
             {
                 Status = TopicEventResponse.Types.TopicEventResponseStatus.Success,

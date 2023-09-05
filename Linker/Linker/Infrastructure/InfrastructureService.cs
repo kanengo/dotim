@@ -1,7 +1,10 @@
 using Dapr.Client;
+using Dapr.Client.Autogen.Grpc.v1;
 using Google.Protobuf;
 using Grpc.Net.Client;
+using NanoidDotNet;
 using Pb;
+using Shared.Bulk;
 using Shared.Topics;
 
 
@@ -9,15 +12,15 @@ namespace Linker.Infrastructure;
 
 public class InfrastructureService
 {
-    public DaprClient DaprClient { get; }
-    
-    public  string PusSubName { get; }
+    private readonly DaprClient _daprClient;
 
     public IConfiguration Configuration { get; }
     
     public ImLogic.ImLogicClient ImLogicClient { get; }
 
-    private Dapr.Client.Autogen.Grpc.v1.Dapr.DaprClient _daprGrpcClient;
+    private readonly Dapr.Client.Autogen.Grpc.v1.Dapr.DaprClient _daprGrpcClient;
+
+    private readonly BulkOperator<BulkPublishRequestEntry> _linkBulkPub;
 
     public InfrastructureService(IConfiguration configuration)
     {
@@ -37,22 +40,48 @@ public class InfrastructureService
             daprClientBuilder.UseGrpcEndpoint(grpcAddress);
         }
 
-        DaprClient = daprClientBuilder.Build();
+        _daprClient = daprClientBuilder.Build();
 
-        PusSubName = configuration["PubSub:Name"] ?? "pubsub";
+        _linkBulkPub = new BulkOperator<BulkPublishRequestEntry>(100, TimeSpan.FromMilliseconds(100));
+        _linkBulkPub.BulkHandler += async (_, args) =>
+        {
+            await _linkPubBulkHandler(args.Data);
+        };
+    }
+
+    private async Task _linkPubBulkHandler(IReadOnlyCollection<BulkPublishRequestEntry> entries)
+    {
+        if (entries.Count == 0) return;
+        var data = new BulkPublishRequest
+        {
+            PubsubName = Configuration["Pubsub:Name"],
+            Topic = string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"])
+        };
+        data.Entries.AddRange(entries);
+        
+        await _daprGrpcClient.BulkPublishEventAlpha1Async(data);
     }
     
-    public async Task PublishLinkStateEventAsync(IMessage<LinkStateEvent> data, Dictionary<string, string> metadata = default!)
-    {   
-        
-        await _publishByteEventAsync(string.Format(CloudEventTopics.Linker.LinkStateChange, Configuration["Namespace"]), data.ToByteArray(),
-            metadata);
-    }
-
-    private async Task _publishByteEventAsync(string topicName, ReadOnlyMemory<byte> data, Dictionary<string, string> metadata = default!,
+    public async Task PublishEventAsync(string topicName, IMessage message, Dictionary<string, string> metadata = default!,
         CancellationToken cancellationToken = default)
     {
-        // DaprClient.BulkPublishEventAsync()
-        await DaprClient.PublishByteEventAsync(PusSubName, topicName, data,metadata:metadata, cancellationToken:cancellationToken);
+        if (topicName == CloudEventTopics.Linker.LinkStateChange)
+        {
+            var entry = new BulkPublishRequestEntry
+            {
+                // ReSharper disable once MethodHasAsyncOverload
+                EntryId = Nanoid.Generate(),
+                Event = message.ToByteString(),
+                ContentType = null
+            };
+            
+            await _linkBulkPub.WriteAsync(entry);
+            return;
+        }
+        
+        
+        await _daprClient.PublishByteEventAsync(string.Format(topicName, Configuration["Namespace"]), topicName, message.ToByteArray(),
+            metadata:metadata, 
+            cancellationToken:cancellationToken);
     }
 }

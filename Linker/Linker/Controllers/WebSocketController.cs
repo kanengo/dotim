@@ -155,7 +155,8 @@ public class WebSocketController: ControllerBase
             InstanceId = ServiceIdentity.Instance.UniqueId,
             State = LinkState.Connect,
         };
-        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent, metadata);
+        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange,
+            linkConnectEvent, metadata);
     }
 
 
@@ -176,7 +177,7 @@ public class WebSocketController: ControllerBase
             InstanceId = ServiceIdentity.Instance.UniqueId,
             State = LinkState.Disconnect,
         };
-        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
+        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange, linkConnectEvent,metadata);
         
     }
 
@@ -196,6 +197,6 @@ public class WebSocketController: ControllerBase
             InstanceId = ServiceIdentity.Instance.UniqueId,
             State = LinkState.Heartbeat,
         };
-        await _infrastructureService.PublishLinkStateEventAsync(linkConnectEvent,metadata);
+        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange, linkConnectEvent,metadata);
     }
 }
