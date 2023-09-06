@@ -16,20 +16,25 @@ public class Connection
 
     private readonly CancellationTokenSource _cts;
 
-    private bool stopped = false;
+    private bool _stopped = false;
 
     public event EventHandler<OnDataEventArgs>? OnDataEvent;
     public event EventHandler? OnCloseEvent;
 
     public event EventHandler? OnConnectEvent;
     
+    public event EventHandler? OnHeartbeatEvent;
     public string ConnectionId {get;}
+
+    public bool Closed => _stopped;
 
     public string UserId { get; set; } = "";
 
     public DeviceType DeviceType { get; set; } = DeviceType.None;
 
     public string AppId { get; set; } = "";
+    
+    public DateTime HeartbeatTime { get; set; }
 
     public class OnDataEventArgs : EventArgs
     {
@@ -58,7 +63,7 @@ public class Connection
 
     public async Task Start()
     {
-        if (stopped)
+        if (_stopped)
         {
             return;
         }
@@ -104,9 +109,9 @@ public class Connection
 
     }
 
-    private async Task CloseAsync(WebSocketCloseStatus webSocketCloseStatus, string? statusDescription)
+    public async Task CloseAsync(WebSocketCloseStatus webSocketCloseStatus, string? statusDescription)
     {
-        if (stopped)
+        if (_stopped)
         {
             return;
         }
@@ -116,17 +121,23 @@ public class Connection
                 CancellationToken.None);
         }
 
-        stopped = true;
+        _stopped = true;
         OnCloseEvent?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task SendMessage(ArraySegment<byte> data)
     {
-        if (stopped)
+        if (_stopped)
         {
             return;
         }
         await _webSocket.SendAsync(data, WebSocketMessageType.Binary, true, _cts.Token);
+    }
+
+    public void Heartbeat()
+    {
+        HeartbeatTime = DateTime.Now;
+        OnHeartbeatEvent?.Invoke(this, EventArgs.Empty);
     }
 
     private async IAsyncEnumerable<byte[]> _receiveAsync()

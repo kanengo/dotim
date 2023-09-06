@@ -82,26 +82,33 @@ public class WebSocketController: ControllerBase
         connection.OnDataEvent += async (sender, args) =>
         {
             if (sender is Connection c)
-               await _onData(c,args);
+               await _onData(c,args).ConfigureAwait(false);
         };
         connection.OnCloseEvent += async (sender, _) =>
         {
             if (sender is Connection c)
             {
-                await _onClose(c);
+                await _onClose(c).ConfigureAwait(false);
             }
         };
         connection.OnConnectEvent += async (sender, _) =>
         {
             if (sender is Connection c)
             {
-               await _onConnect(c);
+               await _onConnect(c).ConfigureAwait(false);
+            }
+        };
+        connection.OnHeartbeatEvent += async (sender, _) =>
+        {
+            if (sender is  Connection c)
+            {
+                await _heartbeat(c).ConfigureAwait(false);
             }
         };
         await connection.Start();
     }
 
-    private async Task _onData(Connection connection, Connection.OnDataEventArgs args)
+    private Task _onData(Connection connection, Connection.OnDataEventArgs args)
     {
         var data = args.Data;
         try
@@ -110,7 +117,7 @@ public class WebSocketController: ControllerBase
             if (packet is null)
             {
                 _logger.LogDebug("Receive packet is null: RawData:{Data}", Encoding.UTF8.GetString(data));
-                return;
+                return Task.CompletedTask;
             }
 
             _logger.LogDebug("Receive packet:{Data}", packet);
@@ -118,7 +125,7 @@ public class WebSocketController: ControllerBase
             switch (packet.Method)
             {
                 case "heartbeat":
-                    await _heartbeat(connection);
+                    connection.Heartbeat();
                     break;
                 default:
                     throw new ConnectException(ConnectErrorCode.NotSupportedMethod, "not supported method");
@@ -135,6 +142,8 @@ public class WebSocketController: ControllerBase
             _logger.LogWarning("receive packet exception:{Message}", ex.Message);
             throw;
         }
+
+        return Task.CompletedTask;
     }
     
     private async Task _onConnect(Connection connection)
@@ -145,7 +154,7 @@ public class WebSocketController: ControllerBase
             {"cloudevent.source",string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
             // {"cloudevent.type", CloudEventType.Linker.LinkStateConnect},
         };
-        ConnectionManager.Instance.AddConnection(connection);
+        ConnectionManager.AddConnection(connection);
         var linkConnectEvent = new LinkStateEvent
         {
             AppId = connection.AppId,
@@ -156,7 +165,7 @@ public class WebSocketController: ControllerBase
             State = LinkState.Connect,
         };
         await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange,
-            linkConnectEvent, metadata);
+            linkConnectEvent, metadata).ConfigureAwait(false);
     }
 
 
@@ -167,7 +176,7 @@ public class WebSocketController: ControllerBase
         {
             {"cloudevent.source", string.Format(CloudEventSource.Linker.LinkConnectSate, _configuration["Namespace"], _configuration["ServiceName"])},
         };
-        ConnectionManager.Instance.RemoveConnection(connection.AppId, connection.UserId, connection.ConnectionId);
+        ConnectionManager.RemoveConnection(connection.AppId, connection.UserId, connection.ConnectionId);
         var linkConnectEvent = new LinkStateEvent
         {
             AppId = connection.AppId,
@@ -177,8 +186,9 @@ public class WebSocketController: ControllerBase
             InstanceId = ServiceIdentity.Instance.UniqueId,
             State = LinkState.Disconnect,
         };
-        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange, linkConnectEvent,metadata);
-        
+        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange, linkConnectEvent,
+            metadata).ConfigureAwait(false);
+
     }
 
     private async Task _heartbeat(Connection connection)
@@ -197,6 +207,6 @@ public class WebSocketController: ControllerBase
             InstanceId = ServiceIdentity.Instance.UniqueId,
             State = LinkState.Heartbeat,
         };
-        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange, linkConnectEvent,metadata);
+        await _infrastructureService.PublishEventAsync(CloudEventTopics.Linker.LinkStateChange, linkConnectEvent,metadata).ConfigureAwait(false);
     }
 }
