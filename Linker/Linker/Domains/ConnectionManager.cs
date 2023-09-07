@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using Google.Type;
 using Shared.Timer;
+using DateTime = System.DateTime;
 
 namespace Linker.Domains;
 
@@ -33,7 +35,7 @@ public class ConnectionManager : IDisposable
 
             if (sender is TimeWheel<Connection> tw)
             {
-                tw.Timeout(TimeSpan.FromMilliseconds(HeartbeatTimeoutMs), connection);
+                tw.Timeout(connection.HeartbeatTime.AddMilliseconds(HeartbeatTimeoutMs).Subtract(DateTime.Now), connection);
             }
         };
         _connectionTimer.Start();
@@ -51,8 +53,13 @@ public class ConnectionManager : IDisposable
         
         var userConnections = appClients.GetOrAdd(connection.UserId, _ => 
             new ConcurrentDictionary<string, Connection>());
+
+        if (!userConnections.TryAdd(connection.ConnectionId, connection)) return false;
         
-        return userConnections.TryAdd(connection.ConnectionId, connection);
+        _connectionTimer.Timeout(TimeSpan.FromMilliseconds(HeartbeatTimeoutMs), connection);
+        
+        return true;
+
     }
 
     private bool _removeConnection(string appId, string userId, string connectionId)

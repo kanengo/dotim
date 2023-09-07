@@ -2,14 +2,14 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/Users/kanonlee/.nuget/packages/dapr.client/1.11.0/lib/netcoreapp3.1/Dapr.Client.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/Users/kanonlee/Library/Caches/JetBrains/Rider2023.2/resharper-host/temp/Rider/vAny/CoverageData/_DotIM.1907891315/Snapshot/snapshot.utdcvr</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=36f76b57_002D3a81_002D4b78_002D99e9_002D806979e36300/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestTimeWheel" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Or&gt;
-    &lt;TestAncestor&gt;
-      &lt;TestId&gt;xUnit::DD64F91F-8355-40BF-A343-40770F6DBC69::net7.0::Shared.Tests.TimeWheelTest.TestTimeWheel&lt;/TestId&gt;
-    &lt;/TestAncestor&gt;
-    &lt;Project Location="/Users/kanonlee/project/github/DotIM/Linker/Linker.Tests" Presentation="&amp;lt;Linker.Tests&amp;gt;" /&gt;
-  &lt;/Or&gt;
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=36f76b57_002D3a81_002D4b78_002D99e9_002D806979e36300/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestTimeWheel" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Or&gt;&#xD;
+    &lt;TestAncestor&gt;&#xD;
+      &lt;TestId&gt;xUnit::DD64F91F-8355-40BF-A343-40770F6DBC69::net7.0::Shared.Tests.TimeWheelTest.TestTimeWheel&lt;/TestId&gt;&#xD;
+    &lt;/TestAncestor&gt;&#xD;
+    &lt;Project Location="\Users\kanonlee\project\github\DotIM\Linker\Linker.Tests" Presentation="&amp;lt;Linker.Tests&amp;gt;" /&gt;&#xD;
+  &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9b87811d_002D4af7_002D4b38_002D89ee_002D5bd8ddc1f85c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestBulkOperator" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;

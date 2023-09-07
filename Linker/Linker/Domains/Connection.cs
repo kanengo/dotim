@@ -115,13 +115,14 @@ public class Connection
         {
             return;
         }
+
+        _stopped = true;
         if (_webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived or WebSocketState.CloseSent)
         {
             await _webSocket.CloseAsync(webSocketCloseStatus, statusDescription,
                 CancellationToken.None);
         }
-
-        _stopped = true;
+        
         OnCloseEvent?.Invoke(this, EventArgs.Empty);
     }
 

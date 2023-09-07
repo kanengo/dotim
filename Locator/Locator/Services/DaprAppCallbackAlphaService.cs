@@ -1,8 +1,6 @@
 using Dapr.AppCallback.Autogen.Grpc.v1;
-using Google.Protobuf.Collections;
 using Grpc.Core;
-using Shared.Topics;
-using static Shared.Topics.CloudEventType;
+using Pb;
 
 namespace Locator.Services;
 
@@ -28,8 +26,9 @@ public class DaprAppCallbackAlphaService : AppCallbackAlpha.AppCallbackAlphaBase
         _logger.LogDebug("OnBulkTopicEventAlpha1 Topic:{} Type:{}", request.Topic, request.Type);
         
         foreach (var t in request.Entries)
-        {   
-            _logger.LogDebug("OnBulkTopicEventAlpha1 entries: {0}", t);
+        {
+            var linkEvent = LinkStateEvent.Parser.ParseFrom(t.CloudEvent.Data);
+            _logger.LogDebug("OnBulkTopicEventAlpha1 entries: {0}", linkEvent);
             response.Statuses.Add(new TopicEventBulkResponseEntry
             {
                 Status = TopicEventResponse.Types.TopicEventResponseStatus.Success,

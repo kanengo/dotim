@@ -78,7 +78,7 @@ public class InfrastructureService
                 // ReSharper disable once MethodHasAsyncOverload
                 EntryId = Nanoid.Generate(),
                 Event = message.ToByteString(),
-                ContentType = "application/octet-stream"
+                ContentType = "application/protobuf"
             };
             
             await _linkBulkPub.WriteAsync(entry);

@@ -16,7 +16,7 @@ public class TimeWheelTest
     public void TestTimeWheel()
     {
         using var timer = new TimeWheel<int>(TimeSpan.FromMilliseconds(10));
-        timer.OnTick +=  async (sender, args) =>
+        timer.OnTick +=  (sender, args) =>
         {
             _testOutputHelper.WriteLine("OnTick {0} {1}", DateTime.Now, args.Data);
             var tw = sender as TimeWheel<int>;

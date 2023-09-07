@@ -45,20 +45,20 @@ public class DaprAppCallbackService : AppCallback.AppCallbackBase
         return Task.FromResult(response);
     }
 
-    public override async Task<TopicEventResponse> OnTopicEvent(TopicEventRequest request, ServerCallContext context)
+    public override Task<TopicEventResponse> OnTopicEvent(TopicEventRequest request, ServerCallContext context)
     {
         switch (request.Type)
         {
             case EventTypePushUsers:
                 var data = OnPushUsers.Parser.ParseFrom(request.Data);
-                await ConnectionManager.Instance.SendMessageByUserIds(data.AppId, data.UserIds, data.Data.ToByteArray());
+                // await ConnectionManager.SendMessageByUserIds(data.AppId, data.UserIds, data.Data.ToByteArray());
                 break;
         }
 
-        return new TopicEventResponse
+        return Task.FromResult(new TopicEventResponse
         {
             Status = TopicEventResponse.Types.TopicEventResponseStatus.Success
-        };
+        });
     }
     
     
